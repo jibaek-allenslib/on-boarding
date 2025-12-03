@@ -1,0 +1,16 @@
+services:
+  allens-on-boarding-db:
+    image: postgres:18
+    container_name: allens-on-boarding-db
+    ports:
+      - "55432:5432"
+    environment:
+      POSTGRES_USER: rookedsysc
+      POSTGRES_PASSWORD: 1234
+      POSTGRES_DB: allens_on_boarding_db
+    networks:
+      - allens-on-boarding
+
+networks:
+  allens-on-boarding:
+    driver: bridge
