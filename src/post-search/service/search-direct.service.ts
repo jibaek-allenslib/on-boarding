@@ -58,7 +58,7 @@ export class SearchDirectService {
         },
       });
 
-      // Prisma는 nested relation에서 fulltext 검색을 지원하지 않음 (contains 사용)
+      // 댓글 내용 검색 조건 추가 (@@fulltext 인덱스 사용)
       conditions.push({
         comments: {
           some: {

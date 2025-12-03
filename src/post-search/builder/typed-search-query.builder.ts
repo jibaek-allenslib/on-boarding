@@ -101,8 +101,7 @@ export class TypedSearchQueryBuilder {
   }
 
   /**
-   * 댓글 내용 검색 조건 생성
-   * Prisma는 nested relation에서 fulltext 검색을 지원하지 않음 (contains 사용)
+   * 댓글 내용 검색 조건 생성 (@@fulltext 인덱스 사용)
    */
   private createCommentContentCondition(
     keyword: string,

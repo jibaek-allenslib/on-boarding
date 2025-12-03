@@ -47,7 +47,7 @@ export class SearchQueryBuilder {
               email: { contains: keyword },
             },
           },
-          // Prisma는 nested relation에서 fulltext 검색을 지원하지 않음 (contains 사용)
+          // 댓글 내용에서 Full Text Search (@@fulltext 인덱스 사용)
           {
             comments: {
               some: {

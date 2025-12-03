@@ -52,7 +52,7 @@ export class KeywordSpecification extends Specification<PostEntity> {
             email: { contains: this.keyword },
           },
         },
-        // Prisma는 nested relation에서 fulltext 검색을 지원하지 않음 (contains 사용)
+        // @@fulltext 인덱스 사용 (comment content)
         {
           comments: {
             some: {
@@ -61,6 +61,104 @@ export class KeywordSpecification extends Specification<PostEntity> {
           },
         },
       ],
+    };
+  }
+}
+
+/**
+ * 사용자 이메일 검색 Specification
+ *
+ * @description 작성자 이메일에서만 키워드를 검색합니다.
+ */
+export class UserEmailSpecification extends Specification<PostEntity> {
+  constructor(private readonly keyword: string) {
+    super();
+  }
+
+  isSatisfiedBy(entity: PostEntity): boolean {
+    const lowerKeyword = this.keyword.toLowerCase();
+    return entity.user?.email.toLowerCase().includes(lowerKeyword) || false;
+  }
+
+  toPrismaQuery(): Prisma.PostWhereInput {
+    return {
+      user: {
+        email: { contains: this.keyword },
+      },
+    };
+  }
+}
+
+/**
+ * 게시물 제목 검색 Specification
+ *
+ * @description 게시물 제목에서만 키워드를 검색합니다.
+ */
+export class PostTitleSpecification extends Specification<PostEntity> {
+  constructor(private readonly keyword: string) {
+    super();
+  }
+
+  isSatisfiedBy(entity: PostEntity): boolean {
+    const lowerKeyword = this.keyword.toLowerCase();
+    return entity.title.toLowerCase().includes(lowerKeyword);
+  }
+
+  toPrismaQuery(): Prisma.PostWhereInput {
+    return {
+      title: { search: this.keyword },
+    };
+  }
+}
+
+/**
+ * 게시물 내용 검색 Specification
+ *
+ * @description 게시물 내용에서만 키워드를 검색합니다.
+ */
+export class PostContentSpecification extends Specification<PostEntity> {
+  constructor(private readonly keyword: string) {
+    super();
+  }
+
+  isSatisfiedBy(entity: PostEntity): boolean {
+    const lowerKeyword = this.keyword.toLowerCase();
+    return entity.content.toLowerCase().includes(lowerKeyword);
+  }
+
+  toPrismaQuery(): Prisma.PostWhereInput {
+    return {
+      content: { search: this.keyword },
+    };
+  }
+}
+
+/**
+ * 댓글 내용 검색 Specification
+ *
+ * @description 댓글 내용에서만 키워드를 검색합니다. (@@fulltext 인덱스 사용)
+ */
+export class CommentContentSpecification extends Specification<PostEntity> {
+  constructor(private readonly keyword: string) {
+    super();
+  }
+
+  isSatisfiedBy(entity: PostEntity): boolean {
+    const lowerKeyword = this.keyword.toLowerCase();
+    return (
+      entity.comments?.some((c) =>
+        c.content.toLowerCase().includes(lowerKeyword),
+      ) || false
+    );
+  }
+
+  toPrismaQuery(): Prisma.PostWhereInput {
+    return {
+      comments: {
+        some: {
+          content: { search: this.keyword },
+        },
+      },
     };
   }
 }

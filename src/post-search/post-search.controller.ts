@@ -14,12 +14,13 @@ import { SearchCompositionService } from './service/search-composition.service';
 import { SearchSpecificationService } from './service/search-specification.service';
 import { SearchKyselyService } from './service/search-kysely.service';
 import { TypedSearchBuilderService } from './service/typed-search-builder.service';
+import { TypedSearchSpecificationService } from './service/typed-search-specification.service';
 import { TypedSearchRequest } from './dto/typed-search-request.dto';
 
 /**
  * 게시물 검색 Controller
  *
- * @description 7가지 다른 구현 방식으로 게시물을 검색할 수 있는 엔드포인트를 제공합니다.
+ * @description 8가지 다른 구현 방식으로 게시물을 검색할 수 있는 엔드포인트를 제공합니다.
  * 각 엔드포인트는 동일한 결과를 반환하지만, 내부 구현 방식이 다릅니다.
  *
  * 엔드포인트:
@@ -30,6 +31,7 @@ import { TypedSearchRequest } from './dto/typed-search-request.dto';
  * - POST /post-search/specification - Specification 패턴 방식
  * - POST /post-search/kysely - Kysely 확장 방식
  * - POST /post-search/typed-builder - 타입별 검색 Builder 패턴 방식
+ * - POST /post-search/typed-specification - 타입별 검색 Specification 패턴 방식
  */
 @ApiTags('Post Search')
 @Controller('post-search')
@@ -42,6 +44,7 @@ export class PostSearchController {
     private readonly searchSpecificationService: SearchSpecificationService,
     private readonly searchKyselyService: SearchKyselyService,
     private readonly typedSearchBuilderService: TypedSearchBuilderService,
+    private readonly typedSearchSpecificationService: TypedSearchSpecificationService,
   ) {}
 
   @Post('direct')
@@ -200,5 +203,44 @@ npm install prisma-extension-kysely kysely
     @Body() request: TypedSearchRequest,
   ): Promise<SearchResponse> {
     return this.typedSearchBuilderService.search(request);
+  }
+
+  @Post('typed-specification')
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: '타입별 검색 Specification 패턴 방식으로 게시물 검색',
+    description: `SearchType별로 개별 Specification을 생성하고 조합합니다.
+
+장점:
+- Specification 패턴의 핵심 강점인 "규칙 조합"을 명확히 표현
+- 각 SearchType별 비즈니스 규칙을 독립적인 객체로 캡슐화
+- and(), or(), not() 메서드로 직관적인 규칙 조합
+- 각 Specification을 독립적으로 테스트 가능
+- 복잡한 검색 조건을 도메인 언어로 표현
+- DDD(Domain-Driven Design) 친화적
+
+사용 시기:
+- DDD를 따르는 프로젝트에서 타입별 검색 구현
+- 복잡한 비즈니스 규칙이 자주 변경되는 경우
+- 검색 조건의 조합이 다양한 경우
+- Builder 패턴보다 더 명시적인 규칙 표현이 필요한 경우
+
+typed-builder와의 차이점:
+- typed-builder: 쿼리 구성에 초점 (How to build query)
+- typed-specification: 비즈니스 규칙 표현에 초점 (What business rules)
+
+예시:
+- searchTypes: [POST_TITLE, POST_CONTENT]
+  → PostTitleSpecification.or(PostContentSpecification)
+- searchTypes: [USER_EMAIL]
+  → UserEmailSpecification
+- searchTypes: [] 또는 미지정
+  → 모든 Specification을 OR로 조합`,
+  })
+  @ApiOkResponse({ type: SearchResponse })
+  async searchTypedSpecification(
+    @Body() request: TypedSearchRequest,
+  ): Promise<SearchResponse> {
+    return this.typedSearchSpecificationService.search(request);
   }
 }
