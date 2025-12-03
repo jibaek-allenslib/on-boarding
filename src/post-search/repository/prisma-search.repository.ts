@@ -48,17 +48,21 @@ export class PrismaSearchRepository implements ISearchRepository {
   async searchByKeyword(keyword: string): Promise<PostWithRelations[]> {
     return this.findPostsWithRelations({
       OR: [
-        { title: { contains: keyword, mode: 'insensitive' as const } },
-        { content: { contains: keyword, mode: 'insensitive' as const } },
+        // @@fulltext 인덱스 사용 (title)
+        { title: { search: keyword } },
+        // @@fulltext 인덱스 사용 (content)
+        { content: { search: keyword } },
+        // 이메일 검색
         {
           user: {
-            email: { contains: keyword, mode: 'insensitive' as const },
+            email: { contains: keyword },
           },
         },
+        // Prisma는 nested relation에서 fulltext 검색을 지원하지 않음 (contains 사용)
         {
           comments: {
             some: {
-              content: { contains: keyword, mode: 'insensitive' as const },
+              content: { search: keyword },
             },
           },
         },

@@ -16,23 +16,23 @@ import {
  */
 
 /**
- * 게시물 제목 검색 조건 생성
+ * 게시물 제목 검색 조건 생성 (@@fulltext 인덱스 사용)
  *
  * @param query 검색어
  * @returns Prisma where 조건
  */
 const titleContains = (query: string): Prisma.PostWhereInput => ({
-  title: { contains: query, mode: 'insensitive' as const },
+  title: { search: query },
 });
 
 /**
- * 게시물 내용 검색 조건 생성
+ * 게시물 내용 검색 조건 생성 (@@fulltext 인덱스 사용)
  *
  * @param query 검색어
  * @returns Prisma where 조건
  */
 const contentContains = (query: string): Prisma.PostWhereInput => ({
-  content: { contains: query, mode: 'insensitive' as const },
+  content: { search: query },
 });
 
 /**
@@ -43,12 +43,13 @@ const contentContains = (query: string): Prisma.PostWhereInput => ({
  */
 const userEmailContains = (email: string): Prisma.PostWhereInput => ({
   user: {
-    email: { contains: email, mode: 'insensitive' as const },
+    email: { contains: email },
   },
 });
 
 /**
  * 댓글 내용 검색 조건 생성
+ * Prisma는 nested relation에서 fulltext 검색을 지원하지 않음 (contains 사용)
  *
  * @param query 검색어
  * @returns Prisma where 조건
@@ -56,7 +57,7 @@ const userEmailContains = (email: string): Prisma.PostWhereInput => ({
 const commentContentContains = (query: string): Prisma.PostWhereInput => ({
   comments: {
     some: {
-      content: { contains: query, mode: 'insensitive' as const },
+      content: { search: query },
     },
   },
 });
@@ -176,9 +177,7 @@ export class SearchCompositionService {
       },
     });
 
-    const results = posts.map((post) =>
-      this.mapToSearchResult(post, request),
-    );
+    const results = posts.map((post) => this.mapToSearchResult(post, request));
 
     const executionTime = performance.now() - startTime;
 
@@ -190,7 +189,10 @@ export class SearchCompositionService {
     });
   }
 
-  private mapToSearchResult(post: any, request: SearchRequest): PostSearchResultDto {
+  private mapToSearchResult(
+    post: any,
+    request: SearchRequest,
+  ): PostSearchResultDto {
     const matchedFields: string[] = [];
 
     if (request.keyword) {

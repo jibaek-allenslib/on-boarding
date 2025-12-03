@@ -1,5 +1,6 @@
 generator client {
   provider = "prisma-client-js"
+  previewFeatures = ["fullTextIndex", "fullTextSearch"]
 }
 
 generator kysely {
@@ -9,17 +10,17 @@ generator kysely {
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "mysql"
   url      = env("DATABASE_URL")
 }
 
 // 사용자 모델
 model User {
-  id           String    @id @db.Uuid
+  id           String    @id @db.VarChar(36)
   email        String    @unique
   password     String
   role         String    @default("USER")
-  refreshToken String?
+  refreshToken String?   @db.Text
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
   posts        Post[]
@@ -32,26 +33,31 @@ model User {
 model Post {
   id        Int       @id @default(autoincrement())
   title     String
-  content   String
+  content   String    @db.Text
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
-  userId    String    @db.Uuid
+  userId    String    @db.VarChar(36)
   user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   comments  Comment[]
 
+  // 개별 필드 검색용 인덱스
+  @@fulltext([title])
+  @@fulltext([content])
+  @@fulltext([title, content])
   @@map("posts")
 }
 
 // 댓글 모델
 model Comment {
   id        Int      @id @default(autoincrement())
-  content   String
+  content   String   @db.Text
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   postId    Int
   post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
-  userId    String   @db.Uuid
+  userId    String   @db.VarChar(36)
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
+  @@fulltext([content])
   @@map("comments")
 }

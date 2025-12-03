@@ -41,28 +41,28 @@ export class SearchDirectService {
     const conditions: Prisma.PostWhereInput[] = [];
 
     if (request.keyword) {
-      // 게시물 제목 검색 조건 추가
+      // 게시물 제목 검색 조건 추가 (@@fulltext 인덱스 사용)
       conditions.push({
-        title: { contains: request.keyword, mode: 'insensitive' as const },
+        title: { search: request.keyword },
       });
 
-      // 게시물 내용 검색 조건 추가
+      // 게시물 내용 검색 조건 추가 (@@fulltext 인덱스 사용)
       conditions.push({
-        content: { contains: request.keyword, mode: 'insensitive' as const },
+        content: { search: request.keyword },
       });
 
       // 작성자 이메일 검색 조건 추가
       conditions.push({
         user: {
-          email: { contains: request.keyword, mode: 'insensitive' as const },
+          email: { contains: request.keyword },
         },
       });
 
-      // 댓글 내용 검색 조건 추가
+      // Prisma는 nested relation에서 fulltext 검색을 지원하지 않음 (contains 사용)
       conditions.push({
         comments: {
           some: {
-            content: { contains: request.keyword, mode: 'insensitive' as const },
+            content: { search: request.keyword },
           },
         },
       });

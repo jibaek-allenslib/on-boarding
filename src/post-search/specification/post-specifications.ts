@@ -42,17 +42,21 @@ export class KeywordSpecification extends Specification<PostEntity> {
   toPrismaQuery(): Prisma.PostWhereInput {
     return {
       OR: [
-        { title: { contains: this.keyword, mode: 'insensitive' as const } },
-        { content: { contains: this.keyword, mode: 'insensitive' as const } },
+        // @@fulltext 인덱스 사용 (title)
+        { title: { search: this.keyword } },
+        // @@fulltext 인덱스 사용 (content)
+        { content: { search: this.keyword } },
+        // 이메일 검색
         {
           user: {
-            email: { contains: this.keyword, mode: 'insensitive' as const },
+            email: { contains: this.keyword },
           },
         },
+        // Prisma는 nested relation에서 fulltext 검색을 지원하지 않음 (contains 사용)
         {
           comments: {
             some: {
-              content: { contains: this.keyword, mode: 'insensitive' as const },
+              content: { search: this.keyword },
             },
           },
         },

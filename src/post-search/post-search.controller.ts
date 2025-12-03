@@ -13,11 +13,13 @@ import { SearchRepositoryService } from './service/search-repository.service';
 import { SearchCompositionService } from './service/search-composition.service';
 import { SearchSpecificationService } from './service/search-specification.service';
 import { SearchKyselyService } from './service/search-kysely.service';
+import { TypedSearchBuilderService } from './service/typed-search-builder.service';
+import { TypedSearchRequest } from './dto/typed-search-request.dto';
 
 /**
  * 게시물 검색 Controller
  *
- * @description 6가지 다른 구현 방식으로 게시물을 검색할 수 있는 엔드포인트를 제공합니다.
+ * @description 7가지 다른 구현 방식으로 게시물을 검색할 수 있는 엔드포인트를 제공합니다.
  * 각 엔드포인트는 동일한 결과를 반환하지만, 내부 구현 방식이 다릅니다.
  *
  * 엔드포인트:
@@ -27,6 +29,7 @@ import { SearchKyselyService } from './service/search-kysely.service';
  * - POST /post-search/composition - Function Composition 방식
  * - POST /post-search/specification - Specification 패턴 방식
  * - POST /post-search/kysely - Kysely 확장 방식
+ * - POST /post-search/typed-builder - 타입별 검색 Builder 패턴 방식
  */
 @ApiTags('Post Search')
 @Controller('post-search')
@@ -38,6 +41,7 @@ export class PostSearchController {
     private readonly searchCompositionService: SearchCompositionService,
     private readonly searchSpecificationService: SearchSpecificationService,
     private readonly searchKyselyService: SearchKyselyService,
+    private readonly typedSearchBuilderService: TypedSearchBuilderService,
   ) {}
 
   @Post('direct')
@@ -167,5 +171,34 @@ npm install prisma-extension-kysely kysely
   @ApiOkResponse({ type: SearchResponse })
   async searchKysely(@Body() request: SearchRequest): Promise<SearchResponse> {
     return this.searchKyselyService.search(request);
+  }
+
+  @Post('typed-builder')
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: '타입별 검색 Builder 패턴 방식으로 게시물 검색',
+    description: `SearchType을 지정하여 특정 필드에서만 검색합니다.
+
+장점:
+- 검색할 필드를 명시적으로 선택 가능 (USER_EMAIL, POST_TITLE, POST_CONTENT, COMMENT_CONTENT)
+- 불필요한 필드 검색 제거로 성능 향상 가능
+- 타입 안전성 보장
+- 유연한 검색 조합
+
+사용 시기:
+- 사용자가 특정 필드에서만 검색하고 싶을 때
+- 검색 범위를 제한하여 정확도를 높이고 싶을 때
+- 검색 성능을 최적화하고 싶을 때
+
+예시:
+- searchTypes: [POST_TITLE, POST_CONTENT] → 제목과 내용에서만 검색
+- searchTypes: [USER_EMAIL] → 작성자 이메일에서만 검색
+- searchTypes: [] 또는 미지정 → 모든 필드에서 검색`,
+  })
+  @ApiOkResponse({ type: SearchResponse })
+  async searchTypedBuilder(
+    @Body() request: TypedSearchRequest,
+  ): Promise<SearchResponse> {
+    return this.typedSearchBuilderService.search(request);
   }
 }

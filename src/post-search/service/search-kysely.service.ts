@@ -7,7 +7,13 @@ import {
   UserInfoDto,
 } from '../dto/post-search-result.dto';
 import kyselyExtension from 'prisma-extension-kysely';
-import { Kysely, PostgresAdapter, PostgresIntrospector, PostgresQueryCompiler } from 'kysely';
+import {
+  Kysely,
+  MysqlAdapter,
+  MysqlIntrospector,
+  MysqlQueryCompiler,
+  sql,
+} from 'kysely';
 import type { DB } from 'src/prisma/generated/types';
 
 /**
@@ -46,10 +52,10 @@ export class SearchKyselyService {
             dialect: {
               // Prisma driver를 Kysely와 연결
               createDriver: () => driver,
-              // PostgreSQL용 adapter, introspector, compiler
-              createAdapter: () => new PostgresAdapter(),
-              createIntrospector: (db) => new PostgresIntrospector(db),
-              createQueryCompiler: () => new PostgresQueryCompiler(),
+              // MySQL용 adapter, introspector, compiler
+              createAdapter: () => new MysqlAdapter(),
+              createIntrospector: (db) => new MysqlIntrospector(db),
+              createQueryCompiler: () => new MysqlQueryCompiler(),
             },
           }),
       }),
@@ -75,12 +81,21 @@ export class SearchKyselyService {
     if (request.keyword) {
       query = query.where(({ or, eb }) =>
         or([
-          // 게시물 제목에서 검색 (대소문자 구분 없음)
-          eb('posts.title', 'ilike', `%${request.keyword}%`),
-          // 게시물 내용에서 검색 (대소문자 구분 없음)
-          eb('posts.content', 'ilike', `%${request.keyword}%`),
-          // 작성자 이메일에서 검색 (대소문자 구분 없음)
-          eb('users.email', 'ilike', `%${request.keyword}%`),
+          // 게시물 제목, 내용: FULLTEXT INDEX 사용 (posts_title_content_idx)
+          sql<boolean>`MATCH(posts.title, posts.content) AGAINST(${request.keyword} IN NATURAL LANGUAGE MODE)`,
+          // 작성자 이메일: LIKE 검색 (FULLTEXT INDEX 없음)
+          eb('users.email', 'like', `%${request.keyword}%`),
+          // 댓글 내용: 서브쿼리 + FULLTEXT INDEX (comments_content_idx)
+          eb(
+            'posts.id',
+            'in',
+            eb
+              .selectFrom('comments')
+              .select('postId')
+              .where(
+                sql<boolean>`MATCH(content) AGAINST(${request.keyword} IN NATURAL LANGUAGE MODE)`,
+              ),
+          ),
         ]),
       );
     }

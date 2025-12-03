@@ -37,21 +37,21 @@ export class SearchQueryBuilder {
     if (keyword) {
       this.condition = {
         OR: [
-          // 게시물 제목에서 검색 (대소문자 구분 없음)
-          { title: { contains: keyword, mode: 'insensitive' as const } },
-          // 게시물 내용에서 검색 (대소문자 구분 없음)
-          { content: { contains: keyword, mode: 'insensitive' as const } },
-          // 작성자 이메일에서 검색 (대소문자 구분 없음)
+          // 게시물 제목에서 Full Text Search (@@fulltext 인덱스 사용)
+          { title: { search: keyword } },
+          // 게시물 내용에서 Full Text Search (@@fulltext 인덱스 사용)
+          { content: { search: keyword } },
+          // 작성자 이메일에서 검색
           {
             user: {
-              email: { contains: keyword, mode: 'insensitive' as const },
+              email: { contains: keyword },
             },
           },
-          // 댓글 내용에서 검색 (대소문자 구분 없음, 하나라도 매칭되면 포함)
+          // Prisma는 nested relation에서 fulltext 검색을 지원하지 않음 (contains 사용)
           {
             comments: {
               some: {
-                content: { contains: keyword, mode: 'insensitive' as const },
+                content: { search: keyword },
               },
             },
           },

@@ -1,13 +1,15 @@
 services:
   allens-on-boarding-db:
-    image: postgres:18
+    image: mysql:8.0
     container_name: allens-on-boarding-db
+    # FULLTEXT 검색 최소 토큰 크기를 2로 설정 (기본값: 3)
+    command: --innodb-ft-min-token-size=2
     ports:
-      - "55432:5432"
+      - "55432:3306"
     environment:
-      POSTGRES_USER: rookedsysc
-      POSTGRES_PASSWORD: 1234
-      POSTGRES_DB: allens_on_boarding_db
+      MYSQL_ROOT_PASSWORD: 1234
+      MYSQL_DATABASE: allens_on_boarding_db
+      MYSQL_PASSWORD: 1234
     networks:
       - allens-on-boarding
 

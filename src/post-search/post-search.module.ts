@@ -7,6 +7,7 @@ import { SearchRepositoryService } from './service/search-repository.service';
 import { SearchCompositionService } from './service/search-composition.service';
 import { SearchSpecificationService } from './service/search-specification.service';
 import { SearchKyselyService } from './service/search-kysely.service';
+import { TypedSearchBuilderService } from './service/typed-search-builder.service';
 import { PrismaSearchRepository } from './repository/prisma-search.repository';
 import { ISearchRepository } from './repository/search.repository.interface';
 
@@ -14,7 +15,7 @@ import { ISearchRepository } from './repository/search.repository.interface';
  * PostSearchModule
  *
  * @description 게시물 검색 기능을 제공하는 모듈입니다.
- * 6가지 다른 구현 방식의 서비스를 제공합니다.
+ * 7가지 다른 구현 방식의 서비스를 제공합니다.
  *
  * Providers:
  * - SearchDirectService: Direct Service Layer 방식
@@ -23,6 +24,7 @@ import { ISearchRepository } from './repository/search.repository.interface';
  * - SearchCompositionService: Function Composition 방식
  * - SearchSpecificationService: Specification 패턴 방식
  * - SearchKyselyService: Kysely 확장 방식
+ * - TypedSearchBuilderService: 타입별 검색 Builder 패턴 방식
  * - PrismaSearchRepository: ISearchRepository 구현체
  *
  * Repository 패턴 의존성 주입:
@@ -60,6 +62,9 @@ import { ISearchRepository } from './repository/search.repository.interface';
 
     // Kysely Service
     SearchKyselyService,
+
+    // Typed Builder Service
+    TypedSearchBuilderService,
   ],
   exports: [
     SearchDirectService,
@@ -68,6 +73,7 @@ import { ISearchRepository } from './repository/search.repository.interface';
     SearchCompositionService,
     SearchSpecificationService,
     SearchKyselyService,
+    TypedSearchBuilderService,
   ],
 })
 export class PostSearchModule {}
