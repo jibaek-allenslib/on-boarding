@@ -56,4 +56,54 @@ export class PostRepository {
     const where = new PostSearchBuilder().setKeyword(keyword).build();
     return this.prisma.post.count({ where });
   }
+
+  /**
+   * 게시물 상세 조회 (작성자, 댓글, 댓글 작성자 포함)
+   * @param id 게시물 ID
+   */
+  async findPostWithDetails(id: number) {
+    return this.prisma.post.findUnique({
+      where: { id },
+      include: {
+        user: true,
+        comments: {
+          include: {
+            user: true,
+          },
+        },
+      },
+    });
+  }
+
+  /**
+   * 게시물 상세 목록 조회 (작성자, 댓글, 댓글 작성자 포함) - Batch
+   * @param ids 게시물 ID 목록
+   */
+  async findPostsWithDetails(ids: number[]) {
+    return this.prisma.post.findMany({
+      where: {
+        id: { in: ids },
+      },
+      include: {
+        user: true,
+        comments: {
+          include: {
+            user: true,
+          },
+        },
+      },
+    });
+  }
+
+  /**
+   * 게시물 목록 조회 (ID 기반)
+   * @param ids 게시물 ID 목록
+   */
+  async findPostsByIds(ids: number[]) {
+    return this.prisma.post.findMany({
+      where: {
+        id: { in: ids },
+      },
+    });
+  }
 }
