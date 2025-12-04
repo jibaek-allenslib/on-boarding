@@ -21,7 +21,7 @@ export class PostDetailDataLoaderService extends DataLoaderService<
 
   protected async batchLoad(
     keys: readonly number[],
-  ): Promise<Array<PostDetailsResponseDto | Error | null>> {
+  ): Promise<Array<PostDetailsResponseDto>> {
     // 1. 게시물 조회
     const posts = await this.postRepository.findPostsByIds([...keys]);
     const postsMap = new Map(posts.map((post) => [post.id, post]));
@@ -44,12 +44,12 @@ export class PostDetailDataLoaderService extends DataLoaderService<
     return keys.map((key) => {
       const post = postsMap.get(key);
       if (!post) {
-        return new Error(`Post with ID ${key} not found`);
+        throw new Error(`Post with ID ${key} not found`);
       }
 
       const postAuthor = usersMap.get(post.userId);
       if (!postAuthor) {
-        return new Error(`Author for post ${key} not found`);
+        throw new Error(`Author for post ${key} not found`);
       }
 
       const postComments = comments.filter((comment) => comment.postId === key);
