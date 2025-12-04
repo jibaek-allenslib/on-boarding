@@ -42,3 +42,5 @@ AGENTS.md
 .github/prompts
 request.md
 src/prisma/generated/
+.agent
+.gemini
