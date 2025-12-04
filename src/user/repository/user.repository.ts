@@ -95,4 +95,30 @@ export class UserRepository {
       data: { refreshToken },
     });
   }
+
+  /**
+   * ID 목록으로 사용자들을 조회합니다 (password 제외).
+   *
+   * @param ids 사용자 ID 목록
+   * @returns 사용자 정보 목록
+   */
+  async findUsersByIds(ids: string[]): Promise<UserWithoutPassword[]> {
+    const users = await this.prisma.user.findMany({
+      where: {
+        id: { in: ids },
+      },
+      select: {
+        id: true,
+        email: true,
+        role: true,
+        createdAt: true,
+        updatedAt: true,
+      },
+    });
+
+    return users.map((user) => ({
+      ...user,
+      role: user.role as UserRole,
+    }));
+  }
 }
