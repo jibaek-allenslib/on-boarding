@@ -11,16 +11,15 @@ import { PostDetailController } from './controller/post-detail.controller';
 import { PostDetailService } from './service/post-detail.service';
 import { PostDetailDataLoaderService } from './service/post-detail-data-loader.service';
 
-import { CommentRepository } from '../comment/repository/comment.repository';
-import { UserRepository } from '../user/repository/user.repository';
+import { UserModule } from '../user/user.module';
+import { CommentModule } from '../comment/comment.module';
+import { PrismaService } from 'src/prisma/prisma.service';
 
 @Module({
-  imports: [PrismaModule],
+  imports: [PrismaModule, UserModule, CommentModule],
   providers: [
     PostCreateService,
     PostRepository,
-    CommentRepository,
-    UserRepository,
     PostListCursorConnectionService,
     PostListOffsetConnectionService,
     PostDetailService,

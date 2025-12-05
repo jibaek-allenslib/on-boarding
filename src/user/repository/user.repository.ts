@@ -2,27 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { User } from '@prisma/client';
 import { PrismaService } from '../../prisma/prisma.service';
 import { UserRole } from '../../common/enums/user-role.enum';
-
-/**
- * 사용자 정보 조회 결과 (password 제외)
- */
-export interface UserWithoutPassword {
-  id: string;
-  email: string;
-  role: UserRole;
-  createdAt: Date;
-  updatedAt: Date;
-}
-
-/**
- * 사용자 생성 데이터
- */
-export interface CreateUserData {
-  id: string;
-  email: string;
-  password: string;
-  role: UserRole;
-}
+import { CreateUserData, UserWithoutPassword } from '../dto/user.result';
 
 @Injectable()
 export class UserRepository {
