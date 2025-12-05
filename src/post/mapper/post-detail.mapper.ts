@@ -1,7 +1,7 @@
 import { Post, Comment } from '@prisma/client';
 import { PostDetailsResponseDto } from '../dto/post-details-response.dto';
 import { UserRole } from '../../common/enums/user-role.enum';
-import { UserWithoutPassword } from '../../user/repository/user.repository';
+import { UserWithoutPassword } from 'src/user/dto/user.result';
 
 export class PostDetailMapper {
   static toDto(args: {
