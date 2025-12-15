@@ -16,7 +16,7 @@ import { BatchDefinition } from '../types/batch-definition.type';
  */
 export const RANDOM_COMMENT_BATCH = {
   name: 'random-comment',
-  schedule: '* * * * * *', // 매초 실행
+  schedule: '1 * * * * *', //
   description: '랜덤한 게시물에 랜덤한 댓글을 작성하는 배치',
 } as const;
 
