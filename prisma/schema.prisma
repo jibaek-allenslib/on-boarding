@@ -61,3 +61,17 @@ model Comment {
   @@fulltext([content])
   @@map("comments")
 }
+
+// 배치 실행 로그 모델
+model BatchLog {
+  id          Int      @id @default(autoincrement())
+  batchName   String   @db.VarChar(100)
+  status      String   @db.VarChar(20) // SUCCESS, FAILURE, RUNNING
+  startedAt   DateTime @default(now())
+  completedAt DateTime?
+  errorMessage String? @db.Text
+  metadata    String?  @db.Text // JSON 형태로 추가 정보 저장
+
+  @@index([batchName, startedAt])
+  @@map("batch_logs")
+}
