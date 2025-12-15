@@ -5,7 +5,7 @@ services:
     # FULLTEXT 검색 최소 토큰 크기를 2로 설정 (기본값: 3)
     command: --innodb-ft-min-token-size=2
     ports:
-      - "55432:3306"
+      - '55432:3306'
     environment:
       MYSQL_ROOT_PASSWORD: 1234
       MYSQL_DATABASE: allens_on_boarding_db
@@ -13,6 +13,27 @@ services:
     networks:
       - allens-on-boarding
 
+  redis:
+    image: redis:8-alpine
+    container_name: allens-on-boarding-redis
+    restart: unless-stopped
+    command: redis-server --requirepass ""
+    ports:
+      - '56379:6379'
+    volumes:
+      - allens-on-boarding-redis-data:/data
+    networks:
+      - allens-on-boarding
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
 networks:
   allens-on-boarding:
     driver: bridge
+
+volumes:
+  allens-on-boarding-redis-data:
+    driver: local
