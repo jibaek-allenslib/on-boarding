@@ -14,6 +14,7 @@ const createMockPost = (id: number): Post => ({
   userId: 'unknown',
   createdAt: new Date(),
   updatedAt: new Date(),
+  commentCount: 0,
 });
 
 @Injectable()

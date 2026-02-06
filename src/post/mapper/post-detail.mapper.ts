@@ -47,7 +47,8 @@ export class PostDetailMapper {
         updatedAt: author.updatedAt,
       },
       comments: postComments,
-      commentCount: postComments.length,
+      // DB에 저장된 댓글 개수를 사용합니다
+      commentCount: post.commentCount,
     };
   }
 
@@ -83,7 +84,8 @@ export class PostDetailMapper {
           updatedAt: comment.user.updatedAt,
         },
       })),
-      commentCount: post.comments.length,
+      // DB에 저장된 댓글 개수를 사용합니다
+      commentCount: post.commentCount,
     };
   }
 }

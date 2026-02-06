@@ -13,13 +13,23 @@ export class CommentRepository {
   }) {
     const { tx, postId, content, userId } = args;
 
-    return tx.comment.create({
+    const comment = await tx.comment.create({
       data: {
         postId,
         content,
         userId,
       },
     });
+
+    // 게시물의 댓글 개수를 atomic하게 증가시킵니다
+    await tx.post.update({
+      where: { id: postId },
+      data: {
+        commentCount: { increment: 1 },
+      },
+    });
+
+    return comment;
   }
 
   /**
